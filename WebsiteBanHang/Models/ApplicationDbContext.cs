@@ -37,6 +37,14 @@ namespace Web_dienmay.Models
             modelBuilder.Entity<StockEntry>()
                 .Property(s => s.Type)
                 .HasMaxLength(50);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderDetail>()
+                .Property(o => o.Price)
+                .HasPrecision(18, 2);
         }
     }
 }   
