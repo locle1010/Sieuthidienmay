@@ -1,0 +1,72 @@
+name: CD - Deploy To VPS
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Push Docker Image"]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Docker image tag to deploy"
+        required: false
+        default: "latest"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve image tag
+        id: vars
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "image_tag=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload deployment files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "deploy/vps/*"
+          target: "/opt/sieuthidienmay"
+          strip_components: 2
+
+      - name: Deploy on VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/sieuthidienmay-web:${{ steps.vars.outputs.image_tag }}
+          DEFAULT_CONNECTION: ${{ secrets.VPS_DEFAULT_CONNECTION }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: IMAGE,DEFAULT_CONNECTION,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
+          script: |
+            set -e
+            mkdir -p /opt/sieuthidienmay
+            cd /opt/sieuthidienmay
+
+            printf "DOCKER_IMAGE=%s\nDEFAULT_CONNECTION=%s\n" "${IMAGE}" "${DEFAULT_CONNECTION}" > .env
+
+            echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+            docker compose -f docker-compose.yml pull
+            docker compose -f docker-compose.yml up -d
+            docker image prune -f
