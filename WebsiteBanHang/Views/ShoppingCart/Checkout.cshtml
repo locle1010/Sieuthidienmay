@@ -1,0 +1,147 @@
+﻿@model Order
+@using Web_dienmay.Extensions
+@using Web_dienmay.Models
+
+<div class="main-content container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header" style="background-color: var(--cream);">
+            <h2 class="mb-0 text-center py-2" style="color: var(--teal);">Thanh Toán Đơn Hàng</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Checkout" method="post">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="card mb-4">
+                            <div class="card-header" style="background-color: var(--cream);">
+                                <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-geo-alt me-2"></i>Thông Tin Giao Hàng</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="ShippingAddress" class="form-label fw-bold">Địa Chỉ Giao Hàng <span class="text-danger">*</span></label>
+                                    <textarea asp-for="ShippingAddress" class="form-control" rows="3" required
+                                              placeholder="Vui lòng nhập địa chỉ giao hàng đầy đủ"
+                                              style="border-color: var(--teal);"></textarea>
+                                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                                    <div class="form-text">Vui lòng cung cấp địa chỉ đầy đủ bao gồm số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Notes" class="form-label fw-bold">Ghi Chú</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3"
+                                              placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết"
+                                              style="border-color: var(--teal);"></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header" style="background-color: var(--cream);">
+                                <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-credit-card me-2"></i>Phương Thức Thanh Toán</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked
+                                           style="border-color: var(--teal);">
+                                    <label class="form-check-label" for="cod">
+                                        <i class="bi bi-cash me-2" style="color: var(--teal);"></i>Thanh toán khi nhận hàng (COD)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="banking" value="BANKING"
+                                           style="border-color: var(--teal);">
+                                    <label class="form-check-label" for="banking">
+                                        <i class="bi bi-bank me-2" style="color: var(--teal);"></i>Chuyển khoản ngân hàng (PayOS)
+                                    </label>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header" style="background-color: var(--cream);">
+                                <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-cart-check me-2"></i>Thông Tin Đơn Hàng</h5>
+                            </div>
+                            <div class="card-body">
+                                @{
+                                    var cart = ViewBag.Cart as ShoppingCart;
+                                    decimal total = 0;
+
+                                    if (cart != null && cart.Items.Any())
+                                    {
+                                        <div class="order-summary">
+                                            @foreach (var item in cart.Items)
+                                            {
+                                                decimal itemTotal = item.Price * item.Quantity;
+                                                total += itemTotal;
+
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <div>
+                                                        <span class="fw-bold" style="color: var(--teal);">@item.Name</span>
+                                                        <small class="text-muted d-block">SL: @item.Quantity</small>
+                                                    </div>
+                                                    <div class="text-end" style="color: var(--bright-orange);">
+                                                        @itemTotal.ToString("N0") ₫
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <hr>
+
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Tạm tính:</span>
+                                                <span style="color: var(--bright-orange);">@total.ToString("N0") ₫</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Phí vận chuyển:</span>
+                                                <span style="color: var(--bright-orange);">0 ₫</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="fw-bold">Tổng cộng:</span>
+                                                <span class="fw-bold fs-5" style="color: var(--bright-orange);">@total.ToString("N0") ₫</span>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert" style="background-color: var(--cream); color: var(--teal);">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>Giỏ hàng của bạn đang trống
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <a asp-controller="Product" asp-action="Index" class="btn"
+                                               style="background-color: var(--teal); color: white;">
+                                                <i class="bi bi-cart-plus me-2"></i>Tiếp tục mua sắm
+                                            </a>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="card-footer" style="background-color: var(--cream);">
+                                @if (cart != null && cart.Items.Any())
+                                {
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-lg"
+                                                style="background-color: var(--teal); color: white;">
+                                            <i class="bi bi-check-circle me-2"></i>Đặt hàng
+                                        </button>
+                                        <a asp-controller="ShoppingCart" asp-action="Index" class="btn"
+                                           style="border-color: var(--teal); color: var(--teal);">
+                                            <i class="bi bi-arrow-left me-2"></i>Quay lại giỏ hàng
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

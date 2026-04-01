@@ -1,0 +1,55 @@
+﻿@page
+@model DownloadPersonalDataModel
+@{
+    ViewData["Title"] = "Tải dữ liệu cá nhân";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<h3 class="mb-4 fw-bold" style="color: #1e293b;">
+    <i class="bi bi-download me-2" style="color: #83a4d4;"></i>@ViewData["Title"]
+</h3>
+
+@if (TempData["StatusMessage"] != null)
+{
+    <partial name="_StatusMessage" model="@TempData["StatusMessage"]" />
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-modern border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="alert alert-info rounded-3 mb-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <h6 class="alert-heading fw-bold">Tải xuống dữ liệu của bạn</h6>
+                            <p class="mb-0">
+                                Tài khoản của bạn chứa dữ liệu cá nhân mà bạn đã cung cấp. 
+                                Nhấn nút bên dưới để tải xuống dữ liệu này dưới dạng file JSON.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" class="form-group">
+                    <button class="btn btn-primary px-4 py-2 fw-bold" type="submit">
+                        <i class="bi bi-download me-2"></i>Tải xuống dữ liệu
+                    </button>
+                </form>
+
+                <hr class="my-4" />
+
+                <div class="d-flex align-items-center text-muted">
+                    <i class="bi bi-shield-check me-2" style="font-size: 1.5rem;"></i>
+                    <small>
+                        Dữ liệu của bạn được bảo mật và chỉ bạn mới có thể truy cập.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+}

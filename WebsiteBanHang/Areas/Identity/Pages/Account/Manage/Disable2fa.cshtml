@@ -1,0 +1,45 @@
+﻿@page
+@using Web_dienmay.Areas.Identity.Pages.Account.Manage
+@model Disable2faModel
+@{
+    ViewData["Title"] = "Vô hiệu hóa xác thực hai yếu tố (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<h3 class="mb-4 fw-bold" style="color: #1e293b;">
+    <i class="bi bi-shield-x me-2" style="color: #ef4444;"></i>@ViewData["Title"]
+</h3>
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-modern border-0 rounded-4 border-warning" style="border-width: 2px !important;">
+            <div class="card-body p-4">
+                <div class="alert alert-warning rounded-3 mb-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h5 class="alert-heading fw-bold">Cảnh báo!</h5>
+                            <p class="mb-0">
+                                Vô hiệu hóa 2FA không làm thay đổi các khóa được sử dụng trong ứng dụng xác thực. 
+                                Nếu bạn muốn thay đổi khóa được sử dụng trong ứng dụng xác thực, bạn nên 
+                                <a asp-page="./ResetAuthenticator" class="alert-link fw-bold">đặt lại khóa xác thực của bạn</a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    <button class="btn btn-danger px-4 py-2 fw-bold" type="submit">
+                        <i class="bi bi-shield-x me-2"></i>Vô hiệu hóa 2FA
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+}

@@ -1,0 +1,2 @@
+date,incident_code,owner,main_sha,hotfix_branch,status
+2026-04-01,INC-001,Le Tan Loc,<sha_main>,hotfix/fix-payment-status,open

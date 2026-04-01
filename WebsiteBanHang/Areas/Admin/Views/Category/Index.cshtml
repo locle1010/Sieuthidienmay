@@ -1,0 +1,48 @@
+﻿@using Web_dienmay.Models
+@model IEnumerable<Category>
+
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2 class="text-black">Quản lý danh mục</h2>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex justify-content-end">
+                <a asp-action="Add" class="btn btn-success">Thêm danh mục mới</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên danh mục</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td>@category.Id</td>
+                            <td>@category.Name</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-primary btn-sm">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger btn-sm">Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
