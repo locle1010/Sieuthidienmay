@@ -1,4 +1,4 @@
-namespace WebsiteBanHang.Models
+namespace Web_dienmay.Models
 {
     public class ErrorViewModel
     {
