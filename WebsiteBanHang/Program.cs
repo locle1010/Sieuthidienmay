@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Web_dienmay.Models;
 using Web_dienmay.Repositories;
 using WebsiteBanHang.Services;
@@ -48,9 +49,19 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 builder.Services.AddRazorPages();
 
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+if (string.IsNullOrWhiteSpace(defaultConnection))
+{
+    throw new InvalidOperationException("Missing ConnectionStrings:DefaultConnection.");
+}
+
+// Accept common key variants from environment secrets to avoid startup failures.
+defaultConnection = Regex.Replace(defaultConnection, @"(^|;)\s*userid\s*=", "$1User Id=", RegexOptions.IgnoreCase);
+defaultConnection = Regex.Replace(defaultConnection, @"(^|;)\s*username\s*=", "$1User Id=", RegexOptions.IgnoreCase);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection"),
+    defaultConnection,
     sqlOptions => sqlOptions.EnableRetryOnFailure(
         maxRetryCount: 5,
         maxRetryDelay: TimeSpan.FromSeconds(10),
