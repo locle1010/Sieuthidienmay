@@ -1,0 +1,2 @@
+date,pr_url,author,reviewer,build_passed,migration_checked,result
+2026-04-01,<pr_url>,<author>,<reviewer>,true,true,approved
