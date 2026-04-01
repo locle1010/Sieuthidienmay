@@ -1,0 +1,3 @@
+[submodule "external/team-docs"]
+	path = external/team-docs
+	url = https://github.com/github/gitignore.git
