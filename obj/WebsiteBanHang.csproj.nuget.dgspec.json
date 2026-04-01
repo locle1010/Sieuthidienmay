@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\letan\\Desktop\\WebsiteBanHang\\WebsiteBanHang.csproj": {}
+    "C:\\Users\\letan\\Desktop\\siuthidienmay\\WebsiteBanHang.csproj": {}
   },
   "projects": {
-    "C:\\Users\\letan\\Desktop\\WebsiteBanHang\\WebsiteBanHang.csproj": {
+    "C:\\Users\\letan\\Desktop\\siuthidienmay\\WebsiteBanHang.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\letan\\Desktop\\WebsiteBanHang\\WebsiteBanHang.csproj",
+        "projectUniqueName": "C:\\Users\\letan\\Desktop\\siuthidienmay\\WebsiteBanHang.csproj",
         "projectName": "WebsiteBanHang",
-        "projectPath": "C:\\Users\\letan\\Desktop\\WebsiteBanHang\\WebsiteBanHang.csproj",
+        "projectPath": "C:\\Users\\letan\\Desktop\\siuthidienmay\\WebsiteBanHang.csproj",
         "packagesPath": "C:\\Users\\letan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\letan\\Desktop\\WebsiteBanHang\\obj\\",
+        "outputPath": "C:\\Users\\letan\\Desktop\\siuthidienmay\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\DevExpress 24.1\\Components\\Offline Packages",
