@@ -49,7 +49,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); 
+options.UseSqlServer(
+    builder.Configuration.GetConnectionString("DefaultConnection"),
+    sqlOptions => sqlOptions.EnableRetryOnFailure(
+        maxRetryCount: 5,
+        maxRetryDelay: TimeSpan.FromSeconds(10),
+        errorNumbersToAdd: null)));
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -59,6 +64,36 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var app = builder.Build();
+
+// Apply pending migrations on startup so the container can boot against a fresh MSSQL volume.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("DatabaseStartup");
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+
+    const int maxAttempts = 15;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            dbContext.Database.Migrate();
+            logger.LogInformation("Database migration completed.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Database migration attempt {Attempt}/{MaxAttempts} failed.", attempt, maxAttempts);
+
+            if (attempt == maxAttempts)
+            {
+                throw;
+            }
+
+            Thread.Sleep(TimeSpan.FromSeconds(4));
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

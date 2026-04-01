@@ -1,0 +1,12 @@
+.git
+.vs
+**/bin
+**/obj
+**/*.user
+
+source
+Web_dienmay/Backup
+DB
+
+README.md
+HUONG_DAN_RESTRUCTURE_VA_RELEASE_V2.md

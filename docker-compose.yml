@@ -1,0 +1,56 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sieuthidienmay-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+      - ./DB:/var/opt/mssql/backup:ro
+    restart: unless-stopped
+
+  db-restore:
+    image: mcr.microsoft.com/mssql-tools:latest
+    container_name: sieuthidienmay-db-restore
+    depends_on:
+      - mssql
+    environment:
+      MSSQL_HOST: "mssql"
+      MSSQL_PORT: "1433"
+      MSSQL_USER: "sa"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+      DB_NAME: "Web_dienmay"
+      BACKUP_FILE: "Web_dienmay"
+    volumes:
+      - ./DB:/backup:ro
+      - ./docker/mssql:/scripts:ro
+    command: ["/bin/bash", "/scripts/restore-backup.sh"]
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sieuthidienmay-web
+    depends_on:
+      mssql:
+        condition: service_started
+      db-restore:
+        condition: service_completed_successfully
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: "Server=mssql,1433;Database=Web_dienmay;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - dp_keys:/root/.aspnet/DataProtection-Keys
+    restart: unless-stopped
+
+volumes:
+  mssql_data:
+  dp_keys:
