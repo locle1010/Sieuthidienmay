@@ -1,0 +1,10 @@
+protected_branches:
+  - main
+  - develop
+merge_rules:
+  main:
+    require_pr: true
+    minimum_approvals: 1
+  develop:
+    require_pr: true
+    minimum_approvals: 1
