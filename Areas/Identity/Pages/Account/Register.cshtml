@@ -1,0 +1,111 @@
+﻿@page
+@using Web_dienmay.Areas.Identity.Pages.Account
+@model RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-modern-lg border-0 rounded-4">
+                <div class="card-header text-center py-4" style="background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%); border-bottom: 2px solid #e0f2fe;">
+                    <div class="mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center" 
+                             style="width: 70px; height: 70px; background: linear-gradient(135deg, #83a4d4 0%, #b6fbff 100%); border-radius: 50%; box-shadow: 0 8px 20px rgba(131, 164, 212, 0.35);">
+                            <i class="bi bi-person-plus" style="color: white; font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0" style="color: #1e293b;">ĐĂNG KÝ TÀI KHOẢN</h3>
+                    <p class="text-muted mb-0 mt-2">Tạo tài khoản mới của bạn</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" autocomplete="off">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-3" role="alert"></div>
+                        }
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.FullName" class="form-control" autocomplete="name" 
+                                   aria-required="true" placeholder="Họ và Tên" />
+                            <label asp-for="Input.FullName"><i class="bi bi-person me-2"></i>Họ và tên</label>
+                            <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                                   aria-required="true" placeholder="name@example.com" />
+                            <label asp-for="Input.Email"><i class="bi bi-envelope me-2"></i>Email</label>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" 
+                                   aria-required="true" placeholder="Mật khẩu" type="password" />
+                            <label asp-for="Input.Password"><i class="bi bi-lock me-2"></i>Mật khẩu</label>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" 
+                                   aria-required="true" placeholder="Xác nhận mật khẩu" type="password" />
+                            <label asp-for="Input.ConfirmPassword"><i class="bi bi-lock-fill me-2"></i>Xác nhận mật khẩu</label>
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-4">
+                            <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select">
+                                <option disabled selected value="">-- Chọn vai trò --</option>
+                            </select>
+                            <label asp-for="Input.Role"><i class="bi bi-people me-2"></i>Vai trò</label>
+                        </div>
+                        
+                        <button id="registerSubmit" type="submit" class="btn btn-primary w-100 py-3 mb-4 fw-bold">
+                            <i class="bi bi-person-plus me-2"></i>Đăng ký
+                        </button>
+                        
+                        <div class="text-center">
+                            <a class="text-decoration-none d-block py-2 rounded-3 hover-link" asp-page="./Login">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Đã có tài khoản? Đăng nhập ngay
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            min-height: 100vh;
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-select:focus ~ label {
+            color: #83a4d4;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #83a4d4;
+            box-shadow: 0 0 0 0.2rem rgba(131, 164, 212, 0.15);
+        }
+        
+        .hover-link {
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .hover-link:hover {
+            color: #83a4d4;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            transform: translateX(5px);
+        }
+    </style>
+}
