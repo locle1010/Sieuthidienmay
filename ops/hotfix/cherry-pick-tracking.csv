@@ -1,0 +1,2 @@
+date,source_branch,target_branch,hotfix_sha,backport_sha,owner,status
+2026-04-01,main,develop,<hotfix_sha>,<backport_sha>,Duong Viet Nghia,done
