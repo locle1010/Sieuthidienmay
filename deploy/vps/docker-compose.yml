@@ -1,0 +1,16 @@
+services:
+  web:
+    image: ${DOCKER_IMAGE}
+    container_name: sieuthidienmay-web
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
+    ports:
+      - "8080:8080"
+    volumes:
+      - dp_keys:/root/.aspnet/DataProtection-Keys
+
+volumes:
+  dp_keys:
