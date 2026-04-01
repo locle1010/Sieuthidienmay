@@ -1,0 +1,154 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Web_dienmay.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    if (User.IsInRole("Admin"))
+    {
+        <li class="nav-item dropdown me-2 admin-dropdown-container">
+            <a class="nav-link dropdown-toggle" asp-area="Admin" asp-controller="Dashboard" asp-action="Index" id="adminDropdown" role="button" aria-expanded="false">
+                <i class="bi bi-gear-fill me-1"></i> Quản trị
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end admin-dropdown" aria-labelledby="adminDropdown">
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-speedometer2 me-2"></i>Bảng điều khiển
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                        <i class="bi bi-box-seam me-2"></i>Quản lý sản phẩm
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">
+                        <i class="bi bi-tags me-2"></i>Quản lý danh mục
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                        <i class="bi bi-receipt me-2"></i>Quản lý đơn hàng
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">
+                        <i class="bi bi-people me-2"></i>Quản lý người dùng
+                    </a>
+                </li>
+            </ul>
+        </li>
+    }
+
+    <li class="nav-item dropdown me-2">
+        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle me-1"></i>@UserManager.GetUserName(User)
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
+            <li>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                    <i class="bi bi-person-gear me-2"></i>Tài khoản của tôi
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="Index">
+                    <i class="bi bi-bag me-1"></i>Đơn hàng
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Product", new { area = "" })">
+                    <button id="logout" type="submit" class="dropdown-item">
+                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item me-2">
+        <a class="nav-link" id="register" asp-area="Identity" asp-page="/Account/Register">
+            <i class="bi bi-person-plus me-1"></i>Đăng ký
+        </a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="nav-link login-btn" id="login" asp-area="Identity" asp-page="/Account/Login">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+        </a>
+    </li>
+}
+
+<style>
+    /* Hover dropdown for Admin menu */
+    .admin-dropdown-container:hover .dropdown-menu {
+        display: block;
+    }
+
+    /* Add transition effect */
+    .admin-dropdown {
+        margin-top: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        display: block !important;
+        transform: translateY(10px);
+    }
+
+    .admin-dropdown-container:hover .admin-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* Fix for touch devices */
+    @@media (hover: none) {
+        .admin-dropdown-container:hover .dropdown-menu
+
+    {
+        display: none;
+    }
+
+    .admin-dropdown {
+        display: none !important;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+
+        .admin-dropdown.show {
+            display: block !important;
+        }
+
+    }
+</style>
+
+<script>
+    // Ensure dropdown functionality on touch devices
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('ontouchstart' in window) {
+            const adminDropdown = document.getElementById('adminDropdown');
+            if (adminDropdown) {
+                adminDropdown.addEventListener('click', function(e) {
+                    if (window.innerWidth < 992) {
+                        // Allow normal navigation on mobile
+                        return;
+                    }
+
+                    const dropdown = this.nextElementSibling;
+                    if (dropdown.classList.contains('show')) {
+                        // If dropdown is open, navigate to dashboard
+                        return;
+                    } else {
+                        // Otherwise show dropdown
+                        e.preventDefault();
+                        dropdown.classList.add('show');
+                    }
+                });
+            }
+        }
+    });
+</script>

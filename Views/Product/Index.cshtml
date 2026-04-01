@@ -1,0 +1,276 @@
+﻿@using Web_dienmay.Models
+@model IEnumerable<Product>
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+    int numofquantity = 1;
+    var currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
+    var totalPages = ViewBag.TotalPages != null ? (int)ViewBag.TotalPages : 1;
+    var totalItems = ViewBag.TotalItems != null ? (int)ViewBag.TotalItems : 0;
+    var hasMorePages = currentPage < totalPages;
+
+    // Kiểm tra xem có đang lọc theo danh mục hay không
+    var isFilteringByCategory = Context.Request.Query.ContainsKey("categoryId") && !string.IsNullOrEmpty(Context.Request.Query["categoryId"]);
+
+    // Kiểm tra xem có đang tìm kiếm hay không
+    var isSearching = Context.Request.Query.ContainsKey("searchTerm") && !string.IsNullOrEmpty(Context.Request.Query["searchTerm"]);
+
+    // Kiểm tra xem có bất kỳ bộ lọc nào đang được áp dụng
+    var isFiltering = isFilteringByCategory || isSearching;
+
+    // Lấy search term nếu có
+    var searchTerm = Context.Request.Query["searchTerm"].ToString();
+}
+
+<div class="main-content container py-4">
+    <!-- Header Section with Title and Filters -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="text-teal mb-0" style="color: var(--teal);">Danh sách sản phẩm</h2>
+
+            @if (isFiltering)
+            {
+                <a asp-action="Index" class="btn btn-sm mt-2" style=" color: white; background-color: var(--teal);">
+                    <i class="bi bi-x-circle"></i> Xóa tất cả bộ lọc
+                </a>
+            }
+        </div>
+
+        <div class="col-md-3">
+            <form method="get" asp-action="Index" class="d-flex" id="sortOrderForm">
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <input type="hidden" name="searchTerm" value="@searchTerm" />
+                }
+
+                @if (Context.Request.Query.ContainsKey("categoryId") && !string.IsNullOrEmpty(Context.Request.Query["categoryId"]))
+                {
+                    <input type="hidden" name="categoryId" value="@Context.Request.Query["categoryId"]" />
+                }
+
+                <select name="sortOrder" id="sortOrder" class="form-select" style="border-color: var(--teal);" onchange="this.form.submit()">
+                    <option value="">Sắp xếp theo</option>
+                    <option value="price_asc" selected="@(ViewBag.CurrentSort == "price_asc")">Giá: Thấp đến cao</option>
+                    <option value="price_desc" selected="@(ViewBag.CurrentSort == "price_desc")">Giá: Cao đến thấp</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-md-3">
+            <form method="get" asp-action="Index" class="d-flex" id="categoryFilterForm">
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <input type="hidden" name="searchTerm" value="@searchTerm" />
+                }
+                <select name="categoryId" id="categoryFilter" class="form-select" style="border-color: var(--teal);" onchange="this.form.submit()">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var item in ViewBag.Categories)
+                    {
+                        <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                    }
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Display active filters -->
+    @if (isFiltering)
+    {
+        <div class="mb-4 p-3 rounded" style="background-color: var(--cream);">
+            <h5 style="color: var(--teal);">Bộ lọc đang áp dụng:</h5>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                @if (isFilteringByCategory)
+                {
+                    <div class="d-flex align-items-center me-3">
+                        <span class="me-2">Danh mục:</span>
+                        @{
+                            var categoryId = Context.Request.Query["categoryId"].ToString();
+                            var selectedText = "";
+                            foreach (var item in ViewBag.Categories)
+                            {
+                                if (item.Value == categoryId)
+                                {
+                                    selectedText = item.Text;
+                                    break;
+                                }
+                            }
+
+                            if (!string.IsNullOrEmpty(selectedText))
+                            {
+                                <span class="badge" style="background-color: var(--teal); color: white;">@selectedText</span>
+                                <a asp-action="Index" asp-route-searchTerm="@searchTerm" class="btn btn-sm ms-2"
+                                   style="color: var(--teal);" title="Xóa bộ lọc danh mục">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                            }
+                        }
+                    </div>
+                }
+
+                @if (isSearching)
+                {
+                    <div class="d-flex align-items-center">
+                        <span class="me-2">Tìm kiếm:</span>
+                        <span class="badge" style="background-color: var(--bright-orange); color: white;">@searchTerm</span>
+                        <a asp-action="Index" asp-route-categoryId="@Context.Request.Query["categoryId"].ToString()" class="btn btn-sm ms-2"
+                           style="color: var(--teal);" title="Xóa tìm kiếm">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Products Grid -->
+    @if (!Model.Any())
+    {
+        <div class="alert text-center my-5" style="background-color: var(--cream); color: var(--teal);">
+            <i class="bi bi-search fs-1 d-block mb-3"></i>
+            <h4>Không tìm thấy sản phẩm</h4>
+            <p>Không có sản phẩm nào phù hợp với tiêu chí tìm kiếm của bạn.</p>
+            <a asp-action="Index" class="btn mt-2" style="background-color: var(--teal); color: white;">Xem tất cả sản phẩm</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-3">
+            @if (isFiltering)
+            {
+                <span>Tìm thấy @totalItems sản phẩm</span>
+            }
+            else
+            {
+                @* <span>Hiển thị @Model.Count() trên tổng số @totalItems sản phẩm</span> *@
+            }
+        </p>
+
+        <div id="products-container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @await Html.PartialAsync("_ProductList", Model)
+        </div>
+
+        <!-- Chỉ hiển thị nút "Xem thêm" khi không lọc -->
+        @if (hasMorePages && !isFiltering)
+        {
+            <div id="load-more-container" class="text-center mt-4 mb-3">
+                <button id="load-more-btn" class="btn" style="background-color: var(--bright-orange); color: white;">
+                    <i class="bi bi-plus-circle me-2"></i>Xem thêm sản phẩm
+                </button>
+                <div id="loading-spinner" class="spinner-border mt-3 d-none" style="color: var(--teal);" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+    /* Star rating styles */
+    .rating-stars {
+        display: inline-flex;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+@section Scripts {
+    <script>
+                $(document).ready(function () {
+            // Store important data
+            const PAGE_SIZE = 12;
+            let currentPage = @currentPage;
+            let categoryId = '@Context.Request.Query["categoryId"]';
+            let searchTerm = '@searchTerm';
+            let sortOrder = '@ViewBag.CurrentSort';
+            let isLoading = false;
+
+            // Set up click event for load more button
+            $("#load-more-btn").on("click", function() {
+                if (isLoading) return;
+                loadMoreProducts();
+            });
+
+            function loadMoreProducts() {
+                // Prevent multiple simultaneous requests
+                if (isLoading) return;
+                isLoading = true;
+
+                // Update UI to show loading state
+                $("#load-more-btn").addClass("d-none");
+                $("#loading-spinner").removeClass("d-none");
+
+                // Increment page for next batch
+                const nextPage = currentPage + 1;
+
+                // Make the AJAX request
+                $.ajax({
+                    url: '@Url.Action("LoadMoreProducts", "Product")',
+                    type: 'GET',
+                    data: {
+                        page: nextPage,
+                        categoryId: categoryId === '' ? null : categoryId,
+                        searchTerm: searchTerm === '' ? null : searchTerm,
+                        sortOrder: sortOrder === '' ? null : sortOrder
+                    },
+                    success: function(response) {
+                        if (response && response.html) {
+                            // Append the returned HTML directly to the container
+                            $("#products-container").append(response.html);
+
+                            // Update current page
+                            currentPage = nextPage;
+
+                            // Show load more button if there are more pages
+                            if (response.hasMorePages) {
+                                $("#load-more-btn").removeClass("d-none");
+                            } else {
+                                // Remove the entire container if no more products
+                                $("#load-more-container").remove();
+                            }
+
+                            // Re-initialize any hover effects or other dynamic behaviors
+                            initHoverEffects();
+                        } else {
+                            console.error("Invalid response format", response);
+                            $("#load-more-container").html(
+                                '<div class="alert alert-warning">Không thể tải thêm sản phẩm.</div>'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading products:", error);
+                        $("#load-more-container").html(
+                            '<div class="alert alert-danger">Đã xảy ra lỗi khi tải thêm sản phẩm.</div>'
+                        );
+                    },
+                    complete: function() {
+                        // Hide loading spinner regardless of outcome
+                        $("#loading-spinner").addClass("d-none");
+                        isLoading = false;
+                    }
+                });
+            }
+
+            // Initialize hover effects for dynamically added elements
+            function initHoverEffects() {
+                $(".hover-shadow").hover(
+                    function() { $(this).css("transform", "translateY(-5px)"); },
+                    function() { $(this).css("transform", ""); }
+                );
+            }
+        });
+    </script>
+}

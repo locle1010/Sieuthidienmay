@@ -1,0 +1,79 @@
+﻿@using Web_dienmay.Models
+@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "Đơn Hàng Của Tôi";
+}
+
+<div class="main-content container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header" style="background-color: var(--cream);">
+            <h2 class="mb-0 text-center py-2" style="color: var(--teal);">Đơn Hàng Của Tôi</h2>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert text-center py-4" style="background-color: var(--cream); color: var(--teal);">
+                    <i class="bi bi-bag-x fs-1 d-block mb-3" style="color: var(--teal);"></i>
+                    <h4>Bạn chưa có đơn hàng nào</h4>
+                    <p>Hãy mua sắm và đặt hàng để xem lịch sử đơn hàng tại đây.</p>
+                    <a asp-controller="Product" asp-action="Index" class="btn mt-2" style="background-color: var(--teal); color: white;">
+                        <i class="bi bi-cart-plus me-2"></i>Mua sắm ngay
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background-color: var(--cream);">
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Ngày đặt</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle">
+                                        <span class="fw-bold" style="color: var(--teal);">#@order.Id</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td class="align-middle text-end" style="color: var(--bright-orange);">
+                                        @order.TotalPrice.ToString("N0") ₫
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        @{
+                                            var badgeStyle = order.OrderStatus switch
+                                            {
+                                                "Đang xử lý" => "background-color: var(--burnt-orange); color: white;",
+                                                "Đã xác nhận" => "background-color: var(--teal); color: white;",
+                                                "Đang giao hàng" => "background-color: var(--teal); color: white;",
+                                                "Đã giao hàng" => "background-color: var(--teal); color: white;",
+                                                "Đã hủy" => "background-color: var(--dark-gray); color: white;",
+                                                _ => "background-color: var(--dark-gray); color: white;"
+                                            };
+                                        }
+                                        <span class="badge" style="@badgeStyle">@order.OrderStatus</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm" 
+                                           style="border-color: var(--teal); color: var(--teal);">
+                                            <i class="bi bi-eye me-1"></i>Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
