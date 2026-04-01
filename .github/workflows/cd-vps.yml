@@ -35,6 +35,19 @@ jobs:
             echo "image_tag=latest" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate DB connection secret format
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.VPS_DEFAULT_CONNECTION }}" ]; then
+            echo "::error::Missing VPS_DEFAULT_CONNECTION secret"
+            exit 1
+          fi
+
+          if printf '%s' "${{ secrets.VPS_DEFAULT_CONNECTION }}" | grep -Eiq '(^|;)[[:space:]]*userid[[:space:]]*='; then
+            echo "::error::VPS_DEFAULT_CONNECTION dung keyword UserId. Hay doi thanh User Id hoac UID."
+            exit 1
+          fi
+
       - name: Upload deployment files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
