@@ -73,6 +73,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 30m
           envs: IMAGE,MSSQL_SA_PASSWORD,DB_NAME,BACKUP_FILE,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
           script: |
             set -e
@@ -88,6 +89,31 @@ jobs:
             docker compose -f docker-compose.yml pull
             docker compose -f docker-compose.yml up -d
 
+            # Wait until backup restore finishes successfully.
+            for i in $(seq 1 80); do
+              RESTORE_STATE=$(docker inspect --format '{{.State.Status}} {{.State.ExitCode}}' sieuthidienmay-db-restore 2>/dev/null || true)
+
+              if [ "${RESTORE_STATE}" = "exited 0" ]; then
+                echo "db-restore completed successfully"
+                break
+              fi
+
+              if echo "${RESTORE_STATE}" | grep -q '^exited '; then
+                echo "db-restore failed with state: ${RESTORE_STATE}"
+                docker compose -f docker-compose.yml logs --tail 200 db-restore
+                exit 1
+              fi
+
+              if [ "$i" -eq 80 ]; then
+                echo "Timed out waiting for db-restore"
+                docker compose -f docker-compose.yml ps
+                docker compose -f docker-compose.yml logs --tail 200 db-restore
+                exit 1
+              fi
+
+              sleep 3
+            done
+
             for i in $(seq 1 20); do
               if docker ps --format '{{.Names}}' | grep -q '^sieuthidienmay-web$'; then
                 break
@@ -102,8 +128,19 @@ jobs:
               exit 1
             fi
 
-            if ! curl -fsS --max-time 15 http://localhost:8080/ >/dev/null; then
+            READY=0
+            for i in $(seq 1 40); do
+              if curl -fsS --max-time 5 http://localhost:8080/ >/dev/null; then
+                READY=1
+                echo "Web endpoint is ready"
+                break
+              fi
+              sleep 3
+            done
+
+            if [ "${READY}" -ne 1 ]; then
               echo "Web endpoint check failed: http://localhost:8080"
+              docker compose -f docker-compose.yml ps
               docker compose -f docker-compose.yml logs --tail 200 web
               exit 1
             fi
