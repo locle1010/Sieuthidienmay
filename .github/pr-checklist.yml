@@ -1,0 +1,5 @@
+required_checks:
+  - branch_synced_with_develop
+  - build_passed
+  - reviewer_assigned
+  - no_direct_push_to_main
