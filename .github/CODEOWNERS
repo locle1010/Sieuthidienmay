@@ -1,0 +1,10 @@
+# Default owners
+* @teamlead
+
+# Core app
+WebsiteBanHang/Controllers/ @backend-reviewer
+WebsiteBanHang/Models/ @backend-reviewer
+WebsiteBanHang/Views/ @frontend-reviewer
+
+# Admin area
+WebsiteBanHang/Areas/Admin/ @admin-reviewer

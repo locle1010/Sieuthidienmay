@@ -1,0 +1,243 @@
+﻿@* WebsiteBanHang/Areas/Admin/Views/ProductRating/Index.cshtml *@
+@model IEnumerable<ProductRating>
+@{
+    ViewData["Title"] = "Quản lý đánh giá sản phẩm";
+    var productId = ViewBag.ProductId as int?;
+    var productName = ViewBag.ProductName as string;
+    var searchTerm = ViewBag.SearchTerm as string;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4 text-black">Quản lý đánh giá sản phẩm</h1>
+    @* <ol class="breadcrumb mb-4"> *@
+    @*     <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li> *@
+    @*     @if (productId.HasValue) *@
+    @*     { *@
+    @*         <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Product" asp-action="Index">Sản phẩm</a></li> *@
+    @*         <li class="breadcrumb-item active">Đánh giá: @productName</li> *@
+    @*     } *@
+    @*     else *@
+    @*     { *@
+    @*         <li class="breadcrumb-item active">Đánh giá sản phẩm</li> *@
+    @*     } *@
+    @* </ol> *@
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                @if (productId.HasValue)
+                {
+                    <span>Đánh giá cho sản phẩm: @productName</span>
+                    <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="bi bi-arrow-left"></i> Xem tất cả đánh giá
+                    </a>
+                }
+                else
+                {
+                    <span>Tất cả đánh giá</span>
+                }
+            </div>
+            <div>
+                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                    <!-- Trường tìm kiếm theo mã sản phẩm -->
+                    <div class="input-group">
+                        <span class="input-group-text">Mã SP</span>
+                        <input type="number" name="productId" class="form-control form-control-sm"
+                               placeholder="Nhập mã" value="@productId" min="1" style="width: 100px;"
+                               aria-label="Mã sản phẩm">
+                    </div>
+
+                    <!-- Trường tìm kiếm theo từ khóa -->
+                    <div class="input-group flex-grow-1">
+                        <input type="text" name="searchTerm" class="form-control form-control-sm"
+                               placeholder="Tìm kiếm theo tên, bình luận..." value="@searchTerm"
+                               aria-label="Từ khóa tìm kiếm">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-search"></i> Tìm
+                        </button>
+                    </div>
+
+                    <!-- Nút xóa bộ lọc -->
+                    @if (productId.HasValue || !string.IsNullOrEmpty(searchTerm))
+                    {
+                        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x"></i> Xóa bộ lọc
+                        </a>
+                    }
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    @if (productId.HasValue)
+                    {
+                        <p>Chưa có đánh giá nào cho sản phẩm #@productId @(productName != null ? $"({productName})" : "").</p>
+                    }
+                    else if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <p>Không tìm thấy đánh giá phù hợp với từ khóa "<strong>@searchTerm</strong>".</p>
+                    }
+                    else
+                    {
+                        <p>Chưa có đánh giá sản phẩm nào.</p>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <span class="badge bg-info">Tổng số: @Model.Count() đánh giá</span>
+                    @if (productId.HasValue)
+                    {
+                        <span class="badge bg-primary ms-2">Sản phẩm: #@productId</span>
+                    }
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <span class="badge bg-secondary ms-2">Tìm kiếm: "@searchTerm"</span>
+                    }
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Sản phẩm</th>
+                                <th>Người dùng</th>
+                                <th>Đánh giá</th>
+                                <th>Bình luận</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var rating in Model)
+                            {
+                                <tr>
+                                    <td>@rating.Id</td>
+                                    <td>
+                                        <a asp-action="Index" asp-route-productId="@rating.ProductId"
+                                           title="Xem tất cả đánh giá cho sản phẩm này">
+                                            <span class="badge bg-secondary">#@rating.ProductId</span> @rating.Product.Name
+                                        </a>
+                                    </td>
+                                    <td>@rating.User.FullName (@rating.User.UserName)</td>
+                                    <td>
+                                        <div class="rating-display">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= rating.Rating)
+                                                {
+                                                    <i class="bi bi-star-fill text-warning"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star text-warning"></i>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (string.IsNullOrEmpty(rating.Comment))
+                                        {
+                                            <span class="text-muted">Không có bình luận</span>
+                                        }
+                                        else
+                                        {
+                                            @(rating.Comment.Length > 50 ? rating.Comment.Substring(0, 50) + "..." : rating.Comment)
+                                        }
+                                    </td>
+                                    <td>@rating.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@rating.Id" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (productId.HasValue)
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@rating.Id" asp-route-returnToProduct="true" class="btn btn-sm btn-danger ms-1">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@rating.Id" class="btn btn-sm btn-danger ms-1">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                        <button type="button" class="btn btn-sm btn-danger ms-1 delete-rating-btn"
+                                                data-id="@rating.Id" data-bs-toggle="tooltip" title="Xóa nhanh">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Handle delete rating via AJAX
+            $('.delete-rating-btn').click(function() {
+                if (confirm('Bạn có chắc chắn muốn xóa đánh giá này không?')) {
+                    var ratingId = $(this).data('id');
+                    var row = $(this).closest('tr');
+
+                    $.ajax({
+                        url: '@Url.Action("DeleteRating")',
+                        type: 'POST',
+                        data: { id: ratingId },
+                        success: function(response) {
+                            if (response.success) {
+                                // Remove the row
+                                row.fadeOut(300, function() { $(this).remove(); });
+
+                                // Show success message
+                                $('.card-body').prepend(
+                                    '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                    response.message +
+                                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                    '</div>'
+                                );
+
+                                // If no more ratings, show empty message
+                                if ($('table tbody tr').length <= 1) {
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 1000);
+                                }
+                            } else {
+                                alert(response.message || 'Có lỗi xảy ra khi xóa đánh giá.');
+                            }
+                        },
+                        error: function() {
+                            alert('Có lỗi xảy ra khi xóa đánh giá.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

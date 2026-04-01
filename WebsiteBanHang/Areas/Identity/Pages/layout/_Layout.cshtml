@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebsiteBanHang</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebsiteBanHang.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="bg-success text-white py-3">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <a class="text-white text-decoration-none" asp-area="" asp-controller="Product" asp-action="Index">
+                    <h1 class="h3 mb-0">Trang web bán hàng</h1>
+                </a>
+            </div>
+            <nav class="d-none d-lg-block">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Product" asp-action="Index">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
+                    </li>
+                    @* <li class="nav-item"> *@
+                    @*     <a class="nav-link text-white" asp-area="" asp-controller="Categories" asp-action="Index">Danh mục</a> *@
+                    @* </li> *@
+                    
+                    <partial name="_LoginPartial" />
+
+                    <
+                </ul>
+            </nav>
+            <button class="navbar-toggler d-lg-none bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            
+    </div>
+
+    <div class="container">
+        <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-6 py-5 my-5 border-top text-success">
+            <div class="col mb-2">
+                <a href="#"
+                   class="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none text-success"
+                   aria-label="Bootstrap">
+                    <h5>Trang Web Bán Hàng</h5>
+                </a>
+                <p class="text-body-secondary">© 2025</p>
+            </div>
+            <div class="col mb-2"></div>
+            <div class="col mb-2">
+                <h5>Section</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2 text-black"><a href="#" class="nav-link p-0 text-body-secondary text-black">Home</a></li>
+                    <li class="nav-item mb-2 text-black"><a href="#" class="nav-link p-0 text-body-secondary text-black">Features</a></li>
+                    <li class="nav-item mb-2 text-black"><a href="#" class="nav-link p-0 text-body-secondary text-black">Pricing</a></li>
+                    <li class="nav-item mb-2 text-black"><a href="#" class="nav-link p-0 text-body-secondary text-black">FAQs</a></li>
+                    <li class="nav-item mb-2 text-black"><a href="#" class="nav-link p-0 text-body-secondary text-black">About</a></li>
+                </ul>
+            </div>
+            <div class="col-md-5 offset-md-1 mb-2">
+                <div class="col-sm-9 footer-left">
+                    <div><b>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ TP.HCM (HUTECH)</b></div>
+                    <div class="text-body-secondary">
+                        <div>
+                            <b class="truso">Trụ sở Điện Biên Phủ:</b> 475A Điện Biên Phủ, P.25, Q.Bình Thạnh, TP.HCM
+                        </div>
+                        <div class="coso"><b>Khu U:</b> 31/36 Ung Văn Khiêm, P.25, Q.Bình Thạnh, TP.HCM</div>
+                        <div class="coso">
+                            <b>Khu E:</b> Khu Công nghệ cao TP.HCM, Xa lộ Hà Nội, P.Hiệp Phú, TP.Thủ Đức,
+                            TP.HCM
+                        </div>
+                        <div class="coso">
+                            <b>Khu R:</b> Khu Công nghệ cao TP.HCM, Đường D1, P.Long Thạnh Mỹ, TP.Thủ Đức,
+                            TP.HCM
+                        </div>
+                        <div><b>Điện thoại:</b> (028) 5445 7777</div>
+                        <div><b>Email:</b> hutech@hutech.edu.vn</div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
