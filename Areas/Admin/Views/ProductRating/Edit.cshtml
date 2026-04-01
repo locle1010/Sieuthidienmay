@@ -1,0 +1,159 @@
+﻿@* WebsiteBanHang/Areas/Admin/Views/Product/Edit.cshtml *@
+@using Web_dienmay.Models
+@model Product
+
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chỉnh sửa sản phẩm</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa sản phẩm</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-edit me-1"></i>
+                    Thông tin sản phẩm
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Tên sản phẩm</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">Giá</label>
+                            <input asp-for="Price" class="form-control" type="number" step="1" asp-format="{0:F0}" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh mục</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select"></select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="StockQuantity" class="form-label">Số lượng trong kho</label>
+                            <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsAvailable" class="form-check-label">Hiển thị sản phẩm</label>
+                            <span asp-validation-for="IsAvailable" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh hiện tại</label>
+                            <div>
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img src="@Model.ImageUrl" alt="Product Image" style="max-width: 200px; max-height: 200px;" id="previewImage" class="img-thumbnail" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 200px; height: 200px;" id="imageContainer">
+                                        <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Thay đổi hình ảnh</label>
+                            <input type="file" name="imageUrl" class="form-control" id="imageInput" />
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Product Ratings Section -->
+            <div id="ratings-container">
+                <div class="d-flex justify-content-center mt-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Load product ratings
+            $.ajax({
+                url: '@Url.Action("GetProductRatings", "ProductRating", new { area = "Admin" })',
+                type: 'GET',
+                data: { productId: @Model.Id },
+                success: function(result) {
+                    $('#ratings-container').html(result);
+                },
+                error: function() {
+                    $('#ratings-container').html('<div class="alert alert-danger">Không thể tải thông tin đánh giá</div>');
+                }
+            });
+
+            // Image preview functionality
+            document.getElementById('imageInput').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const imgContainer = document.getElementById('imageContainer');
+                        const previewImage = document.getElementById('previewImage');
+
+                        if (previewImage) {
+                            previewImage.src = e.target.result;
+                        } else if (imgContainer) {
+                            imgContainer.innerHTML = '';
+                            const newImg = document.createElement('img');
+                            newImg.src = e.target.result;
+                            newImg.id = 'previewImage';
+                            newImg.className = 'img-thumbnail';
+                            newImg.style.maxWidth = '200px';
+                            newImg.style.maxHeight = '200px';
+                            imgContainer.appendChild(newImg);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+}
+

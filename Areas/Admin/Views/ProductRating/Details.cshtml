@@ -1,0 +1,137 @@
+﻿@* WebsiteBanHang/Areas/Admin/Views/ProductRating/Details.cshtml *@
+@model ProductRating
+@{
+    ViewData["Title"] = "Chi tiết đánh giá";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chi tiết đánh giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductRating" asp-action="Index">Đánh giá sản phẩm</a></li>
+        <li class="breadcrumb-item active">Chi tiết đánh giá #@Model.Id</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Thông tin đánh giá
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin sản phẩm</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                                    {
+                                        <img src="@Model.Product.ImageUrl" class="img-thumbnail" alt="@Model.Product.Name" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                                            <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>@Model.Product.Name</h5>
+                                    <p class="mb-2"><strong>ID:</strong> @Model.Product.Id</p>
+                                    <p class="mb-2"><strong>Giá:</strong> @Model.Product.Price.ToString("N0") đ</p>
+                                    <p class="mb-0">
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@Model.Product.Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Sửa sản phẩm
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="ProductRating" asp-action="Index" asp-route-productId="@Model.Product.Id"
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-star"></i> Xem đánh giá
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin người dùng</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2"><strong>Họ tên:</strong> @Model.User.FullName</p>
+                            <p class="mb-2"><strong>Email:</strong> @Model.User.Email</p>
+                            <p class="mb-2"><strong>Tên đăng nhập:</strong> @Model.User.UserName</p>
+                            <p class="mb-2"><strong>Địa chỉ:</strong> @(Model.User.Address ?? "Không có thông tin")</p>
+                            <p class="mb-0">
+                                <a asp-area="Admin" asp-controller="User" asp-action="Details" asp-route-userId="@Model.User.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-person"></i> Xem người dùng
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Nội dung đánh giá</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>ID đánh giá:</strong> @Model.Id</p>
+                            <p class="mb-2"><strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                            <p class="mb-3">
+                                <strong>Điểm đánh giá:</strong>
+                                <span class="ms-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Model.Rating)
+                                        {
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star text-warning"></i>
+                                        }
+                                    }
+                                    <span class="ms-2">(@Model.Rating/5)</span>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Xóa đánh giá
+                            </a>
+                            <a asp-action="Index" class="btn btn-secondary ms-2">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Bình luận</h6>
+                        </div>
+                        <div class="card-body">
+                            @if (string.IsNullOrEmpty(Model.Comment))
+                            {
+                                <p class="text-muted mb-0">Người dùng không để lại bình luận.</p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">@Model.Comment</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

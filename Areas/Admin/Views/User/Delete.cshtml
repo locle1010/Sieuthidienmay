@@ -1,0 +1,70 @@
+﻿<!-- WebsiteBanHang/Areas/Admin/Views/User/Delete.cshtml -->
+@model Web_dienmay.ViewModels.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "Xóa người dùng";
+    bool isCurrentUser = (User.Identity.Name == Model.UserName);
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="text-danger">Xóa người dùng</h2>
+            @if (isCurrentUser)
+            {
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Lưu ý:</strong> Bạn không thể xóa tài khoản của chính mình!
+                </div>
+            }
+            else
+            {
+                <h5 class="text-muted">Bạn có chắc chắn muốn xóa người dùng này?</h5>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Tên đầy đủ:</div>
+                <div class="col-md-9">@Model.FullName</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Tên đăng nhập:</div>
+                <div class="col-md-9">@Model.UserName</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Email:</div>
+                <div class="col-md-9">@Model.Email</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Vai trò:</div>
+                <div class="col-md-9">
+                    @foreach (var role in Model.Roles)
+                    {
+                        <span class="badge bg-primary me-1">@role</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form asp-action="Delete" method="post">
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                    @if (!isCurrentUser)
+                    {
+                        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger" disabled>Xác nhận xóa</button>
+                    }
+                </div>
+            </form>
+            <div asp-validation-summary="All" class="text-danger mt-2"></div>
+        </div>
+    </div>
+</div>
+
