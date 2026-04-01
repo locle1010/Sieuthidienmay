@@ -35,16 +35,16 @@ jobs:
             echo "image_tag=latest" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate DB connection secret format
+      - name: Validate deploy secrets
         shell: bash
         run: |
-          if [ -z "${{ secrets.VPS_DEFAULT_CONNECTION }}" ]; then
-            echo "::error::Missing VPS_DEFAULT_CONNECTION secret"
+          if [ -z "${{ secrets.VPS_MSSQL_SA_PASSWORD }}" ]; then
+            echo "::error::Missing VPS_MSSQL_SA_PASSWORD secret"
             exit 1
           fi
 
-          if printf '%s' "${{ secrets.VPS_DEFAULT_CONNECTION }}" | grep -Eiq '(^|;)[[:space:]]*userid[[:space:]]*='; then
-            echo "::error::VPS_DEFAULT_CONNECTION dung keyword UserId. Hay doi thanh User Id hoac UID."
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ] || [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "::error::Missing DOCKERHUB_USERNAME or DOCKERHUB_TOKEN secret"
             exit 1
           fi
 
@@ -63,7 +63,9 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/sieuthidienmay-web:${{ steps.vars.outputs.image_tag }}
-          DEFAULT_CONNECTION: ${{ secrets.VPS_DEFAULT_CONNECTION }}
+          MSSQL_SA_PASSWORD: ${{ secrets.VPS_MSSQL_SA_PASSWORD }}
+          DB_NAME: ${{ secrets.VPS_DB_NAME }}
+          BACKUP_FILE: ${{ secrets.VPS_BACKUP_FILE }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
@@ -71,15 +73,39 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          envs: IMAGE,DEFAULT_CONNECTION,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
+          envs: IMAGE,MSSQL_SA_PASSWORD,DB_NAME,BACKUP_FILE,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
           script: |
             set -e
             mkdir -p /opt/sieuthidienmay
             cd /opt/sieuthidienmay
 
-            printf "DOCKER_IMAGE=%s\nDEFAULT_CONNECTION=%s\n" "${IMAGE}" "${DEFAULT_CONNECTION}" > .env
+            DB_NAME_VALUE="${DB_NAME:-Web_dienmay}"
+            BACKUP_FILE_VALUE="${BACKUP_FILE:-Web_dienmay}"
+
+            printf "DOCKER_IMAGE=%s\nMSSQL_SA_PASSWORD=%s\nDB_NAME=%s\nBACKUP_FILE=%s\n" "${IMAGE}" "${MSSQL_SA_PASSWORD}" "${DB_NAME_VALUE}" "${BACKUP_FILE_VALUE}" > .env
 
             echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
             docker compose -f docker-compose.yml pull
             docker compose -f docker-compose.yml up -d
+
+            for i in $(seq 1 20); do
+              if docker ps --format '{{.Names}}' | grep -q '^sieuthidienmay-web$'; then
+                break
+              fi
+              sleep 3
+            done
+
+            if ! docker ps --format '{{.Names}}' | grep -q '^sieuthidienmay-web$'; then
+              echo "Web container is not running after deploy"
+              docker compose -f docker-compose.yml ps
+              docker compose -f docker-compose.yml logs --tail 200 web
+              exit 1
+            fi
+
+            if ! curl -fsS --max-time 15 http://localhost:8080/ >/dev/null; then
+              echo "Web endpoint check failed: http://localhost:8080"
+              docker compose -f docker-compose.yml logs --tail 200 web
+              exit 1
+            fi
+
             docker image prune -f
