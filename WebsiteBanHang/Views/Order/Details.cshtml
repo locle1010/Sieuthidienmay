@@ -1,0 +1,147 @@
+﻿@using Web_dienmay.Models
+@model Order
+
+@{
+    ViewData["Title"] = "Chi Tiết Đơn Hàng";
+}
+
+<div class="main-content container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header" style="background-color: var(--cream);">
+            <div class="d-flex justify-content-between align-items-center py-2">
+                <h2 class="mb-0" style="color: var(--teal);">Chi Tiết Đơn Hàng #@Model.Id</h2>
+                <div>
+                    <a asp-action="Invoice" asp-route-id="@Model.Id" class="btn me-2" 
+                       style="background-color: var(--bright-orange); color: white;">
+                        <i class="bi bi-file-earmark-text me-2"></i>Xem hóa đơn
+                    </a>
+                    <a asp-action="Index" class="btn" style="border-color: var(--teal); color: var(--teal);">
+                        <i class="bi bi-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header" style="background-color: var(--cream);">
+                            <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-info-circle me-2"></i>Thông Tin Đơn Hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong>Mã đơn hàng:</strong> <span style="color: var(--teal);">#@Model.Id</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Ngày đặt hàng:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                            <div class="mb-2">
+                                <strong>Trạng thái:</strong>
+                                @{
+                                    var badgeStyle = Model.OrderStatus switch
+                                    {
+                                        "Đang xử lý" => "background-color: var(--burnt-orange); color: white;",
+                                        "Đã xác nhận" => "background-color: var(--teal); color: white;",
+                                        "Đang giao hàng" => "background-color: var(--teal); color: white;",
+                                        "Đã giao hàng" => "background-color: var(--teal); color: white;",
+                                        "Đã hủy" => "background-color: var(--dark-gray); color: white;",
+                                        _ => "background-color: var(--dark-gray); color: white;"
+                                    };
+                                }
+                                <span class="badge" style="@badgeStyle">@Model.OrderStatus</span>
+                            </div>
+                            @if (Model.ShippedDate.HasValue)
+                            {
+                                <div class="mb-2">
+                                    <strong>Ngày giao hàng:</strong> @Model.ShippedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            }
+                            <div class="mb-2">
+                                <strong>Tổng giá trị:</strong> <span style="color: var(--bright-orange); font-weight: bold;">@Model.TotalPrice.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                    <div class="card h-100">
+                        <div class="card-header" style="background-color: var(--cream);">
+                            <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-geo-alt me-2"></i>Thông Tin Giao Hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong>Địa chỉ giao hàng:</strong>
+                                <p class="mb-0">@Model.ShippingAddress</p>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <div class="mb-2">
+                                    <strong>Ghi chú:</strong>
+                                    <p class="mb-0">@Model.Notes</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="background-color: var(--cream);">
+                    <h5 class="mb-0" style="color: var(--teal);"><i class="bi bi-bag me-2"></i>Sản Phẩm Đã Đặt</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead style="background-color: var(--cream);">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td class="align-middle">
+                                            @if (item.Product != null)
+                                            {
+                                                <div class="d-flex align-items-center">
+                                                    @if (item.Product.ImageUrl != null)
+                                                    {
+                                                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
+                                                    }
+                                                    <div>
+                                                        <a asp-controller="Product" asp-action="Display" asp-route-id="@item.ProductId" 
+                                                           class="text-decoration-none" style="color: var(--teal);">
+                                                            @item.Product.Name
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span>Sản phẩm #@item.ProductId</span>
+                                            }
+                                        </td>
+                                        <td class="text-center align-middle">@item.Quantity</td>
+                                        <td class="text-end align-middle" style="color: var(--bright-orange);">@item.Price.ToString("N0") ₫</td>
+                                        <td class="text-end align-middle" style="color: var(--bright-orange); font-weight: bold;">@((item.Price * item.Quantity).ToString("N0")) ₫</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot style="background-color: var(--cream);">
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
+                                    <td class="text-end fw-bold" style="color: var(--bright-orange);">
+                                        @Model.TotalPrice.ToString("N0") ₫
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

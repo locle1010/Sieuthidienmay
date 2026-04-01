@@ -1,0 +1,59 @@
+﻿@model int
+<div class="main-content container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header" style="background-color: var(--cream);">
+            <h2 class="mb-0 text-center py-2" style="color: var(--teal);">Đặt Hàng Thành Công</h2>
+        </div>
+        <div class="card-body py-5">
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 5rem; color: var(--teal);"></i>
+                </div>
+                <h3 class="mb-3" style="color: var(--teal);">Cảm ơn bạn đã đặt hàng!</h3>
+                <p class="lead">Đơn hàng của bạn với mã <span class="fw-bold" style="color: var(--teal);">#@Model</span> đã được đặt thành công.</p>
+                <p>Chúng tôi đã gửi email xác nhận đơn hàng. Bạn có thể theo dõi trạng thái đơn hàng trong tài khoản của mình.</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card mb-4" style="border-color: var(--teal);">
+                        <div class="card-header" style="background-color: var(--teal); color: white;">
+                            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Thông Tin Đơn Hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Mã đơn hàng:</strong></p>
+                                    <p class="fw-bold" style="color: var(--teal);">#@Model</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Ngày đặt hàng:</strong></p>
+                                    <p>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+                                </div>
+                            </div>
+                            <div class="alert" style="background-color: var(--cream); color: var(--teal);">
+                                <i class="bi bi-truck me-2"></i> Đơn hàng của bạn sẽ được xử lý và giao đến trong vòng 3-5 ngày làm việc.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6 mb-3">
+                                <a asp-controller="Product" asp-action="Index" class="btn w-100"
+                                   style="border-color: var(--teal); color: var(--teal);">
+                                    <i class="bi bi-cart-plus me-2"></i>Tiếp tục mua sắm
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a asp-action="Details" asp-controller="Order" asp-route-id="@Model" class="btn w-100" style="background-color: var(--teal); color: white;">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Xem chi tiết đơn hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

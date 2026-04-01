@@ -1,0 +1,252 @@
+﻿@{
+    ViewData["Title"] = "Nhập kho";
+    var products = ViewBag.Products as List<Web_dienmay.Models.Product>;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2 class="text-black"><i class="bi bi-box-arrow-in-down"></i> Nhập kho sản phẩm</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="ImportProducts" method="post" id="import-form">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Ghi chú chung (tùy chọn)</label>
+                        <textarea name="note" class="form-control" rows="2"
+                                  placeholder="Ví dụ: Nhập hàng từ nhà cung cấp ABC - Đợt 1/2025"></textarea>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0">Chọn sản phẩm và số lượng nhập</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="select-all-btn">
+                            <i class="bi bi-check-all"></i> Chọn tất cả
+                        </button>
+                    </div>
+                    <input type="text" id="search-product" class="form-control mb-3"
+                           placeholder="Tìm kiếm sản phẩm...">
+                </div>
+
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th style="width: 5%;"><input type="checkbox" id="check-all"></th>
+                                <th style="width: 10%;">Hình ảnh</th>
+                                <th style="width: 30%;">Tên sản phẩm</th>
+                                <th style="width: 15%;">Danh mục</th>
+                                <th style="width: 12%;" class="text-center">Tồn hiện tại</th>
+                                <th style="width: 15%;" class="text-center">Số lượng nhập</th>
+                                <th style="width: 13%;" class="text-center">Tồn sau nhập</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            @foreach (var product in products)
+                            {
+                                <tr class="product-row" data-name="@product.Name.ToLower()">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="product-checkbox"
+                                               data-product-id="@product.Id">
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name"
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-secondary"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@product.Name</strong>
+                                        <br />
+                                        <small class="text-muted">ID: @product.Id</small>
+                                    </td>
+                                    <td>@product.Category?.Name</td>
+                                    <td class="text-center">
+                                        <span class="current-stock badge bg-info">@product.StockQuantity</span>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="items[@products.IndexOf(product)].ProductId"
+                                               value="@product.Id" hidden>
+                                        <input type="number"
+                                               name="items[@products.IndexOf(product)].Quantity"
+                                               class="form-control text-center quantity-input"
+                                               min="0"
+                                               value="0"
+                                               data-current-stock="@product.StockQuantity"
+                                               data-product-id="@product.Id">
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="new-stock badge bg-secondary"
+                                              data-product-id="@product.Id">@product.StockQuantity</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Tổng kết:</h5>
+                            <p class="mb-1">Số sản phẩm được chọn: <strong id="selected-count">0</strong></p>
+                            <p class="mb-0">Tổng số lượng nhập: <strong id="total-quantity">0</strong></p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button type="submit" class="btn btn-success btn-lg" id="submit-btn">
+                                <i class="bi bi-check-circle"></i> Xác nhận nhập kho
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Tìm kiếm sản phẩm
+            $('#search-product').on('input', function() {
+                const searchText = $(this).val().toLowerCase();
+                $('.product-row').each(function() {
+                    const productName = $(this).data('name');
+                    if (productName.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Check all
+            $('#check-all').change(function() {
+                $('.product-checkbox').prop('checked', $(this).prop('checked'));
+                if ($(this).prop('checked')) {
+                    $('.quantity-input').val(10); // Mặc định 10
+                    updateAllNewStock();
+                } else {
+                    $('.quantity-input').val(0);
+                    updateAllNewStock();
+                }
+                updateSummary();
+            });
+
+            // Individual checkbox
+            $('.product-checkbox').change(function() {
+                const productId = $(this).data('product-id');
+                const input = $(`.quantity-input[data-product-id="${productId}"]`);
+
+                if ($(this).prop('checked')) {
+                    input.val(10); // Mặc định 10
+                } else {
+                    input.val(0);
+                }
+
+                updateNewStock(productId);
+                updateSummary();
+            });
+
+            // Cập nhật tồn kho mới khi nhập số lượng
+            $('.quantity-input').on('input', function() {
+                const productId = $(this).data('product-id');
+                const checkbox = $(`.product-checkbox[data-product-id="${productId}"]`);
+
+                if (parseInt($(this).val()) > 0) {
+                    checkbox.prop('checked', true);
+                } else {
+                    checkbox.prop('checked', false);
+                }
+
+                updateNewStock(productId);
+                updateSummary();
+            });
+
+            // Cập nhật tồn kho mới cho một sản phẩm
+            function updateNewStock(productId) {
+                const input = $(`.quantity-input[data-product-id="${productId}"]`);
+                const currentStock = parseInt(input.data('current-stock'));
+                const importQty = parseInt(input.val()) || 0;
+                const newStock = currentStock + importQty;
+
+                $(`.new-stock[data-product-id="${productId}"]`)
+                    .text(newStock)
+                    .removeClass('bg-secondary bg-success bg-warning')
+                    .addClass(importQty > 0 ? 'bg-success' : 'bg-secondary');
+            }
+
+            // Cập nhật tất cả tồn kho mới
+            function updateAllNewStock() {
+                $('.quantity-input').each(function() {
+                    const productId = $(this).data('product-id');
+                    updateNewStock(productId);
+                });
+            }
+
+            // Cập nhật tổng kết
+            function updateSummary() {
+                let selectedCount = 0;
+                let totalQuantity = 0;
+
+                $('.quantity-input').each(function() {
+                    const qty = parseInt($(this).val()) || 0;
+                    if (qty > 0) {
+                        selectedCount++;
+                        totalQuantity += qty;
+                    }
+                });
+
+                $('#selected-count').text(selectedCount);
+                $('#total-quantity').text(totalQuantity);
+
+                // Enable/disable submit button
+                $('#submit-btn').prop('disabled', selectedCount === 0);
+            }
+
+            // Select all button
+            $('#select-all-btn').click(function() {
+                $('#check-all').prop('checked', true).trigger('change');
+            });
+
+            // Validation trước khi submit
+            $('#import-form').submit(function(e) {
+                let hasItems = false;
+                $('.quantity-input').each(function() {
+                    if (parseInt($(this).val()) > 0) {
+                        hasItems = true;
+                        return false;
+                    }
+                });
+
+                if (!hasItems) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn ít nhất một sản phẩm và nhập số lượng!');
+                    return false;
+                }
+
+                return confirm(`Bạn có chắc chắn muốn nhập kho cho ${$('#selected-count').text()} sản phẩm với tổng số lượng ${$('#total-quantity').text()}?`);
+            });
+
+            // Initial summary update
+            updateSummary();
+        });
+    </script>
+}
