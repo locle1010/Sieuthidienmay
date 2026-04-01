@@ -1,0 +1,99 @@
+﻿@page
+@model EmailModel
+@{
+    ViewData["Title"] = "Quản lý Email";
+    ViewData["ActivePage"] = ManageNavPages.Email;
+}
+
+<h3 class="mb-4 fw-bold" style="color: #1e293b;">
+    <i class="bi bi-envelope me-2" style="color: #83a4d4;"></i>@ViewData["Title"]
+</h3>
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-modern border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <form id="email-form" method="post">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div asp-validation-summary="All" class="alert alert-danger rounded-3 mb-3" role="alert"></div>
+                    }
+                    
+                    @if (Model.IsEmailConfirmed)
+                    {
+                        <div class="alert alert-success rounded-3 d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Email đã xác nhận</strong>
+                                <div class="small">Email của bạn đã được xác thực thành công.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="Email" disabled />
+                            <label asp-for="Email"><i class="bi bi-envelope me-2"></i>Email hiện tại</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning rounded-3 d-flex align-items-center mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Email chưa xác nhận</strong>
+                                <div class="small">Vui lòng xác nhận email của bạn.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="Email" disabled />
+                            <label asp-for="Email"><i class="bi bi-envelope me-2"></i>Email hiện tại</label>
+                        </div>
+                        
+                        <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" 
+                                class="btn btn-warning px-4 py-2 fw-bold mb-3">
+                            <i class="bi bi-send me-2"></i>Gửi email xác nhận
+                        </button>
+                    }
+                    
+                    <hr class="my-4" />
+                    
+                    <h5 class="mb-3 fw-bold" style="color: #64748b;">Thay đổi email</h5>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" 
+                               aria-required="true" placeholder="Email mới" />
+                        <label asp-for="Input.NewEmail"><i class="bi bi-envelope-plus me-2"></i>Email mới</label>
+                        <span asp-validation-for="Input.NewEmail" class="text-danger small"></span>
+                    </div>
+                    
+                    <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" 
+                            class="btn btn-primary px-4 py-2 fw-bold">
+                        <i class="bi bi-arrow-repeat me-2"></i>Thay đổi email
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .form-floating > .form-control:focus ~ label {
+            color: #83a4d4;
+        }
+        
+        .form-control:focus {
+            border-color: #83a4d4;
+            box-shadow: 0 0 0 0.2rem rgba(131, 164, 212, 0.15);
+        }
+        
+        /* Ẩn validation summary khi không có lỗi */
+        .validation-summary-valid {
+            display: none !important;
+        }
+    </style>
+}
